@@ -420,6 +420,11 @@ void VerificationCase(int l, int c)
 		printf("\t\ttu as mangé un fantome en mode 2\n");	
 		pthread_kill(tab[l][c],SIGCHLD);
 	} 
+	else if(localmode == 1 && tab[l][c] != MUR && tab[l][c] != VIDE) //tab[l][c] == FANTOME)
+	{
+		pthread_mutex_unlock(&mutexTab);
+		pthread_exit(NULL);
+	}
 
 	
 }
