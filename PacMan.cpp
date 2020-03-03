@@ -264,16 +264,16 @@ void Attente(int milli)
 void AfficheTab()
 {
 	pthread_mutex_lock(&mutexTab);
-	EffEcran();
-	for(int i = 0; i < NB_LIGNE; i++)
-	{
-		for(int j = 0; j < NB_COLONNE; j++)
+		EffEcran();
+		for(int i = 0; i < NB_LIGNE; i++)
 		{
-			printf("\t%d",tab[i][j]);
+			for(int j = 0; j < NB_COLONNE; j++)
+			{
+				printf("\t%d",tab[i][j]);
+			}
+			printf("\n\n");
 		}
-		printf("\n\n");
-	}
-	char c = getchar();
+		char c = getchar();
 	pthread_mutex_unlock(&mutexTab);
 }
 
@@ -313,17 +313,17 @@ void* ThreadPacMan(void* pt)
 	while(!libre)
 	{
 		pthread_mutex_lock(&mutexTab);
-		if(tab[LPAC][CPAC] == VIDE || tab[LPAC][CPAC]==PACGOM)
-		libre = true;
+			if(tab[LPAC][CPAC] == VIDE || tab[LPAC][CPAC]==PACGOM)
+			libre = true;
 		pthread_mutex_unlock(&mutexTab);
 	}
 	
 	DessinePacMan(LPAC,CPAC,dir);  
 	
 	pthread_mutex_lock(&mutexTab);
-	sigprocmask(SIG_SETMASK, &oldmask, NULL);
-	tab[LPAC][CPAC] = PACMAN;	
-	sigprocmask(SIG_SETMASK, &mask, NULL);
+		sigprocmask(SIG_SETMASK, &oldmask, NULL);
+		tab[LPAC][CPAC] = PACMAN;	
+		sigprocmask(SIG_SETMASK, &mask, NULL);
 	pthread_mutex_unlock(&mutexTab);
 	
 	ok = 0;
@@ -379,7 +379,7 @@ void VerificationCase(int l, int c)
 	int localmode;
 	
 	pthread_mutex_lock(&mutexMode);
-	localmode = mode;
+		localmode = mode;
 	pthread_mutex_unlock(&mutexMode);
 	
 	//	pthread_mutex_lock(&mutexTab) deja fait dans le thread appelant
@@ -388,7 +388,7 @@ void VerificationCase(int l, int c)
 		if(tab[l][c] != BONUS)
 		{
 			pthread_mutex_lock(&mutexCompteur);
-			nbPacGom --;
+				nbPacGom --;
 			pthread_mutex_unlock(&mutexCompteur);
 		}
 		
@@ -403,21 +403,21 @@ void VerificationCase(int l, int c)
 			AppliqueScore(SUPERPACGOM);
 			
 			pthread_mutex_lock(&mutexMode);
-			mode = 2;
+				mode = 2;
 			
-			if(!pthread_kill(TimeOutTid,0))
-			{
-				printf("\t -- LE TIMER ETAIT ENCORE ACTIF\n");
-				tempsrestant = alarm(0);	
-				printf("temps restant %d \n",tempsrestant);
-			}
-			else
-			{
-				printf("\t -- LE TIMER ETAIT TERMINE\n");
-				tempsrestant = 0;
-			}
+				if(!pthread_kill(TimeOutTid,0))
+				{
+					printf("\t -- LE TIMER ETAIT ENCORE ACTIF\n");
+					tempsrestant = alarm(0);	
+					printf("temps restant %d \n",tempsrestant);
+				}
+				else
+				{
+					printf("\t -- LE TIMER ETAIT TERMINE\n");
+					tempsrestant = 0;
+				}
 			
-			pthread_create(&TimeOutTid,NULL,ThreadTimeOut,(void*)&tempsrestant);
+				pthread_create(&TimeOutTid,NULL,ThreadTimeOut,(void*)&tempsrestant);
 			
 			pthread_mutex_unlock(&mutexMode);	
 			
@@ -439,7 +439,7 @@ void VerificationCase(int l, int c)
 	} 
 	else if(localmode == 1 && tab[l][c] != MUR && tab[l][c] != VIDE) //tab[l][c] == FANTOME)
 	{
-		pthread_mutex_unlock(&mutexTab);
+		pthread_mutex_unlock(&mutexTab); // je coupe court le mutex precedent
 		pthread_exit(NULL);
 	}
 
@@ -449,13 +449,13 @@ void VerificationCase(int l, int c)
 void AppliqueScore(int objet)
 {
 	pthread_mutex_lock(&mutexScore);
-	switch(objet)
-	{
-		case PACGOM: score+= 1; break;
-		case SUPERPACGOM: score+= 5; break;
-		case BONUS: score+= 30; break;
-		case FANTOME: score+= 50; break;
-	}
+		switch(objet)
+		{
+			case PACGOM: score+= 1; break;
+			case SUPERPACGOM: score+= 5; break;
+			case BONUS: score+= 30; break;
+			case FANTOME: score+= 50; break;
+		}
 	pthread_mutex_unlock(&mutexScore);
 	pthread_cond_signal(&condScore);
 }
@@ -491,40 +491,40 @@ void* ThreadPacCom(void* pt)
 	printf("Debut du ThreadPacCom %d\n",pthread_self());
 	int i, j;
 	
-		pthread_mutex_lock(&mutexTab);
+	pthread_mutex_lock(&mutexTab);
 	while(1)
 	{
 		DessineChiffre(14,22,niveau);
 		
 
 			pthread_mutex_lock(&mutexCompteur);
-			// dessine pacGom à toutes les cases vides -- EXCEPT (15.8) (8.8) (9.8)
-			for(i = 0; i < NB_LIGNE ; i++)
-				for(j = 0; j < NB_COLONNE; j++)
-				{
-						if ((i == 15 && j == 8) || (i == 8 && j == 8) || (i == 9 && j == 8))
-							j++;
+				// dessine pacGom à toutes les cases vides -- EXCEPT (15.8) (8.8) (9.8)
+				for(i = 0; i < NB_LIGNE ; i++)
+					for(j = 0; j < NB_COLONNE; j++)
+					{
+							if ((i == 15 && j == 8) || (i == 8 && j == 8) || (i == 9 && j == 8))
+								j++;
 				
-						if(tab[i][j] == VIDE)
-						{
-							nbPacGom++;
-							DessinePacGom(i,j);
-							tab[i][j] = PACGOM;
-						}
+							if(tab[i][j] == VIDE)
+							{
+								nbPacGom++;
+								DessinePacGom(i,j);
+								tab[i][j] = PACGOM;
+							}
 				
-				}
+					}
 	
 				// dessine SuperPacGom (2.1) (2.15) (15.1) (15.15)	
 				DessineSuperPacGom(2,1);
 				tab[2][1] = SUPERPACGOM;	
 				// nbPacGom++; on remplace un PacGom donc pas besoin
-	
+
 				DessineSuperPacGom(2,15);
 				tab[2][15] = SUPERPACGOM;
-	
+
 				DessineSuperPacGom(15,1);
 				tab[15][1] = SUPERPACGOM;
-	
+
 				DessineSuperPacGom(15,15);
 				tab[15][15] = SUPERPACGOM;
 			pthread_mutex_unlock(&mutexCompteur);
@@ -588,8 +588,11 @@ void* ThreadPacCom(void* pt)
 			pthread_mutex_unlock(&mutexBonus);
 			
 			pthread_mutex_lock(&mutexMode);
+			pthread_cancel(TimeOutTid);
+			alarm(0);
 			mode = 1;
 			pthread_mutex_unlock(&mutexMode);
+			pthread_cond_signal(&condMode);
 			
 		
 		pthread_mutex_lock(&mutexReset);
@@ -1066,6 +1069,11 @@ void FonctionTerminaisonFantome()
 	pthread_mutex_lock(&mutexReset);
 	reset = isGameReseting;
 	pthread_mutex_unlock(&mutexReset);
+	
+	if(CF(cle)->cache == BONUS)
+	{
+		pthread_mutex_unlock(&mutexBonus);
+	}
 	
 	if(!reset)
 	{
