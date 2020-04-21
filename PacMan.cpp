@@ -405,17 +405,10 @@ void VerificationCase(int l, int c)
 			pthread_mutex_lock(&mutexMode);
 				mode = 2;
 			
-				if(!pthread_kill(TimeOutTid,0))
-				{
-					printf("\t -- LE TIMER ETAIT ENCORE ACTIF\n");
-					tempsrestant = alarm(0);	
-					printf("temps restant %d \n",tempsrestant);
-				}
-				else
-				{
-					printf("\t -- LE TIMER ETAIT TERMINE\n");
-					tempsrestant = 0;
-				}
+				tempsrestant = alarm(0);
+
+				if(tempsrestant > 0)
+					pthread_cancel(&ThreadTimeOut);
 			
 				pthread_create(&TimeOutTid,NULL,ThreadTimeOut,(void*)&tempsrestant);
 			
@@ -476,10 +469,10 @@ void* ThreadEvent(void*)
 		  {
 		  	 case 'x' : AfficheTab(); break;
 		    case 'q' : ok = 1; break; 
-		    case KEY_RIGHT : kill(getpid(), SIGHUP); 	break; // signaux à envoyer
+		    case KEY_RIGHT :	kill(getpid(), SIGHUP); 	break; // signaux à envoyer
 		    case KEY_LEFT : 	kill(getpid(), SIGINT); 	break;
 		    case KEY_DOWN : 	kill(getpid(), SIGUSR2); 	break;
-		    case KEY_UP : 	kill(getpid(), SIGUSR1); 	break;
+		    case KEY_UP : 		kill(getpid(), SIGUSR1); 	break;
 		  }
 		}
 	}
@@ -824,16 +817,16 @@ void* ThreadFantome(void* pt)
 			{
 				switch(dir)
 			  	{
-			  		case DROITE:	if(tab[CF(cle)->L][CF(cle)->C+1] != MUR && tab[CF(cle)->L][CF(cle)->C+1] <= 0)	CF(cle)->C++; 	else changedir = true;
+			  		case DROITE:	if(tab[CF(cle)->L][CF(cle)->C+1] <= 0)	CF(cle)->C++; 	else changedir = true;
 			  				break;
 			  		
-			  		case GAUCHE:	if(tab[CF(cle)->L][CF(cle)->C-1] != MUR && tab[CF(cle)->L][CF(cle)->C-1] <= 0) CF(cle)->C--; 	else changedir = true;
+			  		case GAUCHE:	if(tab[CF(cle)->L][CF(cle)->C-1] <= 0) CF(cle)->C--; 	else changedir = true;
 			  				break;
 			  			
-			  		case HAUT:		if(tab[CF(cle)->L-1][CF(cle)->C] != MUR && tab[CF(cle)->L-1][CF(cle)->C] <= 0) CF(cle)->L--;		else changedir = true;
+			  		case HAUT:		if(tab[CF(cle)->L-1][CF(cle)->C] <= 0) CF(cle)->L--;		else changedir = true;
 							break;
 				  		
-			  		case BAS:		if(tab[CF(cle)->L+1][CF(cle)->C] != MUR && tab[CF(cle)->L+1][CF(cle)->C] <= 0) CF(cle)->L++; 	else changedir = true;
+			  		case BAS:		if(tab[CF(cle)->L+1][CF(cle)->C] <= 0) CF(cle)->L++; 	else changedir = true;
 							break;  				
 				}
 			}
